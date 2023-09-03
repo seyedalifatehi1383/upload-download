@@ -6,7 +6,7 @@ import {
 } from '@loopback/rest-explorer';
 import multer from 'multer';
 import {RepositoryMixin} from '@loopback/repository';
-import {RestApplication} from '@loopback/rest';
+import {HttpErrors, RestApplication} from '@loopback/rest';
 import {ServiceMixin} from '@loopback/service-proxy';
 import path from 'path';
 import{FILE_UPLOAD_SERVICE,STORAGE_DIRECTORY} from './keys';
@@ -14,7 +14,7 @@ import {MySequence} from './sequence';
 import {FileUploadController} from './controllers';
 export {ApplicationConfig};
 import { namefile } from "./controllers/file-upload.controller";
-import {error} from 'console';
+
 
 export class UploadDownloadApplication extends BootMixin(
   ServiceMixin(RepositoryMixin(RestApplication)),
@@ -48,7 +48,7 @@ export class UploadDownloadApplication extends BootMixin(
   }
 
 
-    configureFileUpload(destination?: string) {
+  configureFileUpload(destination?: string) {
     // Upload files to `dist/.sandbox` by default
     destination = destination ?? path.join(__dirname, '../file');
     this.bind(STORAGE_DIRECTORY).to(destination);
@@ -64,15 +64,22 @@ export class UploadDownloadApplication extends BootMixin(
       }),
       fileFilter : function(req , file , cd ){
         checkFileType(file , cd)
-      }
+      },
+
     };
+
 
 
     function checkFileType(file : Express.Multer.File , cd : multer.FileFilterCallback){
       if (file.originalname.split('.')[1] == 'png') {
-        return cd(null , true)
+        if (file.size <2) {
+          return cd(null , true)
+
+        } else {
+          return cd(new HttpErrors.Forbidden('file could not be more that 2 bytes'))
+        }
       }else{
-        return cd(null , false)
+        return cd(new HttpErrors.Forbidden('file suffix should be png '))
       }
 
     }

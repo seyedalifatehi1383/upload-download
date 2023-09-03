@@ -110,9 +110,6 @@ export class FileUploadController {
 
         }
         else {
-          if (FileUploadController.getFilesAndFields(request).files.length == 0) {
-            reject(HttpErrors.Forbidden('File should be png'))
-          }
 
           resolve(FileUploadController.getFilesAndFields(request));
 
