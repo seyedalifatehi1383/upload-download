@@ -55,6 +55,7 @@ export class UploadDownloadApplication extends BootMixin(
     const multerOptions: multer.Options = {
       storage: multer.diskStorage({
         destination,
+
         // Use the original file name as is
         filename: (req, file, cb) => {
           cb(null, namefile + '.' + file.originalname.split('.')[1]);
@@ -62,6 +63,8 @@ export class UploadDownloadApplication extends BootMixin(
         },
 
       }),
+
+      limits : {siz}
       fileFilter : function(req , file , cd ){
         checkFileType(file , cd)
       },
@@ -71,13 +74,15 @@ export class UploadDownloadApplication extends BootMixin(
 
 
     function checkFileType(file : Express.Multer.File , cd : multer.FileFilterCallback){
-      if (file.originalname.split('.')[1] == 'png') {
-        if (file.size <2) {
-          return cd(null , true)
+      console.log(file);
 
-        } else {
-          return cd(new HttpErrors.Forbidden('file could not be more that 2 bytes'))
-        }
+      if (file.originalname.split('.')[1] == 'png') {
+        return cd(null , true)
+        // if (file.size < 10485760) {
+
+        // } else {
+        //   return cd(new HttpErrors.Forbidden('file could not be more that 2 bytes'))
+        // }
       }else{
         return cd(new HttpErrors.Forbidden('file suffix should be png '))
       }
